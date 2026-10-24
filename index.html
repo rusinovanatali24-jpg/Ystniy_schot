@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Счёт в уме: рабочий лист</title>
+<style>
+:root{--bg:#f6f7fb;--card:#fff;--tx:#1e2433;--mut:#667089;--ac:#4f46e5;--acl:#eef0ff;--ok:#16a34a;--okl:#dcfce7;--bad:#dc2626;--badl:#fee2e2;--bd:#dfe3ee;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#12141c;--card:#1c202c;--tx:#eceff7;--mut:#9aa3ba;--ac:#8b85ff;--acl:#262a45;--ok:#4ade80;--okl:#143222;--bad:#f87171;--badl:#3b1a1a;--bd:#2d3345;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#12141c;--card:#1c202c;--tx:#eceff7;--mut:#9aa3ba;--ac:#8b85ff;--acl:#262a45;--ok:#4ade80;--okl:#143222;--bad:#f87171;--badl:#3b1a1a;--bd:#2d3345;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:860px;margin:0 auto;padding:20px 16px 48px}
+h1{font-size:1.6rem;margin:.2em 0 .1em}
+.sub{color:var(--mut);margin:0 0 16px}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.tab{flex:1 1 200px;border:2px solid var(--bd);background:var(--card);color:var(--tx);border-radius:12px;padding:10px 12px;font:inherit;font-weight:600;cursor:pointer}
+.tab.on{border-color:var(--ac);background:var(--acl);color:var(--ac)}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:18px;margin-bottom:16px}
+.card h2{margin:0 0 10px;font-size:1.15rem}
+.rule{border-left:5px solid var(--ac)}
+.ex{background:var(--acl);border-radius:10px;padding:10px 14px;margin-top:10px;font-size:1.05rem}
+.tasks{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px}
+.task{border:1px solid var(--bd);border-radius:12px;padding:12px}
+.q{font-size:1.35rem;font-weight:700}
+.hint{color:var(--mut);font-size:.95rem;margin-bottom:6px}
+.task label{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:6px;font-size:.95rem}
+input{width:96px;font:inherit;font-size:1.1rem;padding:6px 8px;border:2px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--tx);text-align:right}
+input:focus{outline:none;border-color:var(--ac)}
+input.ok{border-color:var(--ok);background:var(--okl)}
+input.bad{border-color:var(--bad);background:var(--badl)}
+.btn{font:inherit;font-weight:600;border:0;border-radius:10px;padding:10px 16px;background:var(--ac);color:#fff;cursor:pointer}
+.btn.sec{background:var(--acl);color:var(--ac)}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:12px}
+.res{font-weight:600}
+.clock{font:700 2.4rem/1 ui-monospace,Menlo,Consolas,monospace;color:var(--ac);min-width:6.5ch}
+.fgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-top:12px}
+.fgrid .task{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.fgrid.hide{filter:blur(8px);pointer-events:none;user-select:none}
+.fix{font-size:.85rem;color:var(--bad);display:block;text-align:right}
+</style>
+</head>
+<body>
+<main>
+<h1>Счёт в уме</h1>
+<p class="sub">Для каждой темы: правило → разминка → блок на скорость с секундомером.</p>
+<div class="tabs" id="tabs"></div>
+<div id="panel"></div>
+</main>
+<script>
+const R=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+const pick=a=>a[R(0,a.length-1)];
+const f=n=>String(n).replace(/\B(?=(\d{3})+(?!\d))/g,'\u00a0');
+const z=(n,k)=>n*Math.pow(10,k);
+const bigX=()=>Math.random()<.6?R(2,9):R(11,35);
+
+const T=[
+{id:'zero',title:'1. Нули',
+rule:`<b>Умножение:</b> умножь числа без нулей, потом припиши справа <b>все</b> нули.<br><b>Деление:</b> вычеркни нули поровну: сколько нулей у делителя, столько вычеркни у делимого.
+<div class="ex">40 × 300 → 4 × 3 = 12, нулей 1 + 2 = 3 → <b>12\u00a0000</b><br>3\u00a0600 ÷ 60 → 360 ÷ 6 = <b>60</b></div>`,
+gen(){
+ if(Math.random()<.5){
+  const x=bigX(),y=Math.random()<.2?1:R(2,9);let i=R(0,2),j=R(0,2);if(i+j===0)j=1;
+  const A=z(x,i),B=z(y,j);
+  return{q:`${f(A)} × ${f(B)}`,hint:'',steps:[{l:`${x} × ${y} =`,a:x*y},{l:'Сколько нулей приписать?',a:i+j},{l:'Ответ:',a:x*y*Math.pow(10,i+j)}]};
+ }
+ const x=bigX(),y=Math.random()<.2?1:R(2,9),q=R(1,2),e=R(0,2),p=q+e;
+ const D=z(x*y,p),d=z(y,q);
+ return{q:`${f(D)} ÷ ${f(d)}`,hint:'',steps:[{l:'Без нулей: '+(x*y)+' ÷ '+y+' =',a:x},{l:'Сколько нулей осталось приписать?',a:e},{l:'Ответ:',a:z(x,e)}]};
+}},
+{id:'mul',title:'2. Умножение разложением',
+rule:`Разложи число на разряды (единицы, десятки, сотни, тысячи), умножь каждую часть на однозначное число и <b>сложи</b> результаты.
+<div class="ex">47 × 6 = 40 × 6 + 7 × 6 = 240 + 42 = <b>282</b><br>3\u00a0482 × 6 = 3\u00a0000×6 + 400×6 + 80×6 + 2×6 = 18\u00a0000 + 2\u00a0400 + 480 + 12 = <b>20\u00a0892</b></div>`,
+gen(){
+ const n=R(2,4);let s;
+ do{s=[R(1,9)];for(let k=1;k<n;k++)s.push(R(0,9));}while(s.filter(v=>v).length<2);
+ const parts=[];s.forEach((dg,k)=>{if(dg)parts.push(z(dg,n-1-k))});
+ const N=+s.join(''),m=R(2,9);
+ const steps=parts.map(p=>({l:`${f(p)} × ${m} =`,a:p*m}));
+ steps.push({l:'Сложи всё:',a:N*m});
+ return{q:`${f(N)} × ${m}`,hint:`${f(N)} = ${parts.map(f).join(' + ')}`,steps};
+}},
+{id:'div',title:'3. Деление разложением',
+rule:`Разложи делимое на две удобные части, каждая из которых делится на делитель. Раздели обе части и <b>сложи</b> результаты.
+<div class="ex">78 ÷ 6: 78 = 60 + 18 → 60 ÷ 6 = 10, 18 ÷ 6 = 3 → 10 + 3 = <b>13</b><br>91 ÷ 7: 91 = 70 + 21 → 10 + 3 = <b>13</b></div>`,
+gen(){
+ const d=R(2,9);const qmax=Math.floor(99/d);
+ const q=R(11,Math.max(11,qmax));const N=d*q;
+ const t=Math.floor(q/10),u=q%10;
+ const a=d*10*t,b=d*u;
+ if(!b)return T[2].gen();
+ return{q:`${N} ÷ ${d}`,hint:`${N} = ${a} + ${b}`,steps:[{l:`${a} ÷ ${d} =`,a:t*10},{l:`${b} ÷ ${d} =`,a:u},{l:'Сложи:',a:q}]};
+}}
+];
+
+let cur=0,best={},timer=null,t0=0,fast=[],running=false;
+const $=s=>document.querySelector(s);
+
+function tabs(){
+ $('#tabs').innerHTML=T.map((t,i)=>`<button class="tab ${i===cur?'on':''}" data-i="${i}">${t.title}</button>`).join('');
+ $('#tabs').onclick=e=>{const b=e.target.closest('.tab');if(!b)return;stop();cur=+b.dataset.i;tabs();render();};
+}
+function render(){
+ const t=T[cur];
+ $('#panel').innerHTML=`
+ <section class="card rule"><h2>Правило</h2>${t.rule}</section>
+ <section class="card"><h2>Разминка</h2>
+  <div class="tasks" id="warm"></div>
+  <div class="row"><button class="btn" id="chk">Проверить</button><button class="btn sec" id="newW">Новый набор</button><span class="res" id="wres"></span></div>
+ </section>
+ <section class="card"><h2>На скорость</h2>
+  <p class="hint">10 примеров. Нажми «Старт», решай и в конце нажми «Финиш» (или Enter в последнем примере). Только ответы, без черновика.</p>
+  <div class="row"><div class="clock" id="clock">00:00.0</div><button class="btn" id="go">Старт</button><button class="btn sec" id="fin" disabled>Финиш</button><span class="res" id="fres"></span></div>
+  <div class="fgrid hide" id="fast"></div>
+ </section>`;
+ warm();fastBuild();
+ $('#newW').onclick=warm;
+ $('#chk').onclick=()=>{
+  const ins=[...document.querySelectorAll('#warm input')];let ok=0;
+  ins.forEach(i=>{const v=parse(i.value);const g=v===+i.dataset.a;i.className=g?'ok':(i.value?'bad':'');if(g)ok++;});
+  $('#wres').textContent=`Верно: ${ok} из ${ins.length}`;
+ };
+ $('#go').onclick=start;$('#fin').onclick=()=>finish();
+}
+const parse=s=>{const v=s.replace(/[\s\u00a0]/g,'');return v===''?NaN:+v;};
+function warm(){
+ const t=T[cur];const items=Array.from({length:5},()=>t.gen());
+ $('#warm').innerHTML=items.map(it=>`<div class="task"><div class="q">${it.q} = ?</div><div class="hint">${it.hint||'&nbsp;'}</div>${it.steps.map(s=>`<label>${s.l}<input inputmode="numeric" data-a="${s.a}"></label>`).join('')}</div>`).join('');
+ $('#wres').textContent='';
+}
+function fastBuild(){
+ const t=T[cur];fast=Array.from({length:10},()=>{const it=t.gen();return{q:it.q,a:it.steps[it.steps.length-1].a};});
+ $('#fast').className='fgrid hide';
+ $('#fast').innerHTML=fast.map((p,i)=>`<div class="task"><span class="q">${p.q} =</span><span><input inputmode="numeric" data-i="${i}"><span class="fix"></span></span></div>`).join('');
+ $('#fast').onkeydown=e=>{
+  if(e.key!=='Enter'||!running)return;e.preventDefault();
+  const ins=[...document.querySelectorAll('#fast input')];const k=ins.indexOf(e.target);
+  if(k===ins.length-1)finish();else ins[k+1].focus();
+ };
+ $('#clock').textContent='00:00.0';$('#fres').textContent='';
+}
+function fmt(ms){const s=ms/1000;const m=Math.floor(s/60);return String(m).padStart(2,'0')+':'+(s%60).toFixed(1).padStart(4,'0');}
+function start(){
+ if(running)return;
+ fastBuild();$('#fast').className='fgrid';running=true;
+ $('#go').disabled=true;$('#fin').disabled=false;
+ t0=performance.now();timer=setInterval(()=>{$('#clock').textContent=fmt(performance.now()-t0)},100);
+ document.querySelector('#fast input').focus();
+}
+function stop(){clearInterval(timer);running=false;}
+function finish(){
+ if(!running)return;
+ const ms=performance.now()-t0;stop();
+ $('#clock').textContent=fmt(ms);
+ let ok=0;
+ document.querySelectorAll('#fast input').forEach(i=>{
+  const p=fast[+i.dataset.i];const g=parse(i.value)===p.a;i.className=g?'ok':'bad';i.disabled=true;
+  if(g)ok++;else i.nextElementSibling.textContent='верно: '+f(p.a);
+ });
+ const id=T[cur].id;let msg=`Верно: ${ok} из 10 · ${(ms/10000).toFixed(1)} с на пример`;
+ if(ok===10&&(!best[id]||ms<best[id])){msg+=best[id]?' · 🏆 новый рекорд!':' · 🏆 первый рекорд!';best[id]=ms;}
+ else if(best[id])msg+=` · рекорд: ${fmt(best[id])}`;
+ $('#fres').textContent=msg;
+ $('#go').disabled=false;$('#go').textContent='Ещё раз';$('#fin').disabled=true;
+}
+tabs();render();
+</script>
+</body>
+</html>
